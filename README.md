@@ -152,27 +152,16 @@ print(f"Final Score: {score:.3f}")
 
 ## Usage
 
-### Running the Baseline (Heuristic Agent)
+### Running Evaluation Agent (Inference)
 
 ```bash
-# Run all tasks
-python baseline_inference.py --task all --episodes 10 --seed 42
+# Set your active endpoints and keys
+export API_BASE_URL="https://api.openai.com/v1"
+export MODEL_NAME="gpt-4"
+export HF_TOKEN="your-api-key-here"
 
-# Run specific task
-python baseline_inference.py --task easy --episodes 5
-```
-
-### Running with OpenAI API (LLM Agent)
-
-```bash
-# Set your API key
-export OPENAI_API_KEY="your-api-key-here"
-
-# Run with GPT-4
-python openai_baseline.py --task all --model gpt-4 --episodes 3 --verbose
-
-# Run with specific task
-python openai_baseline.py --task hard --model gpt-4-turbo --seed 42
+# Run inference directly natively
+python inference.py
 ```
 
 ### Running Tests
@@ -195,7 +184,7 @@ pytest tests/ --cov=src/openenv_project --cov-report=html
 docker build -t datapipeline-env .
 
 # Run the container
-docker run --rm datapipeline-env python baseline_inference.py --task all --episodes 3
+docker run --rm datapipeline-env python inference.py
 
 # Run with interactive shell
 docker run -it --rm datapipeline-env /bin/bash
@@ -257,8 +246,7 @@ openenv_project/
 │   ├── test_models.py        # Model tests
 │   ├── test_environment.py   # Environment tests
 │   └── test_graders.py       # Grader tests
-├── baseline_inference.py     # Heuristic baseline agent
-├── openai_baseline.py        # OpenAI API baseline agent
+├── inference.py              # LLM inference agent
 ├── app.py                    # Hugging Face Spaces demo
 ├── openenv.yaml              # OpenEnv specification
 ├── Dockerfile                # Docker configuration
