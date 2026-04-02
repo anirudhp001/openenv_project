@@ -37,26 +37,9 @@ COPY README.md .
 RUN useradd --create-home --shell /bin/bash appuser && chown -R appuser:appuser /app
 USER appuser
 
-# Default command
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
-
-# Stage 3: Development (optional, use with --target development)
-FROM production as development
-
-USER root
-
-# Install development dependencies
-COPY requirements*.txt ./
-RUN if [ -f requirements-dev.txt ]; then pip install --user --no-cache-dir -r requirements-dev.txt; fi
-
-# Install package in editable mode
-RUN pip install --user -e .
-
-USER appuser
-
-# Expose port for web interface (if added later)
-EXPOSE 7860
-
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD python -c "from src.openenv_project import DataPipelineEnv; env = DataPipelineEnv(); env.reset(); print('Healthy')" || exit 1
+    CMD python -c "from src.openenv_project import DataPipelineEnv; env = DataPipelineEnv(seed=42); env.reset(); print('Healthy')" || exit 1
+
+# Default command
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
