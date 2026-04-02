@@ -1,0 +1,182 @@
+spec_version: "1.0"
+
+environment:
+  name: "DataPipelineEnv"
+  version: "1.0.0"
+  description: "Data pipeline management simulation environment for AI agent training"
+  author: "Hackathon Scaler"
+  license: "MIT"
+  
+  # Observation space definition
+  observation_space:
+    type: "structured"
+    fields:
+      - name: "pending_jobs"
+        type: "list"
+        description: "Jobs waiting to be processed"
+      - name: "running_jobs"
+        type: "list"
+        description: "Currently executing jobs"
+      - name: "completed_jobs"
+        type: "list"
+        description: "Successfully completed jobs"
+      - name: "failed_jobs"
+        type: "list"
+        description: "Failed jobs awaiting retry"
+      - name: "available_resources"
+        type: "dict"
+        description: "Current available compute resources"
+      - name: "total_resources"
+        type: "dict"
+        description: "Total compute resource capacity"
+      - name: "queue_length"
+        type: "integer"
+        description: "Number of jobs in queue"
+      - name: "avg_wait_time"
+        type: "float"
+        description: "Average job wait time"
+      - name: "resource_utilization"
+        type: "float"
+        description: "Current resource utilization percentage"
+      - name: "cost_so_far"
+        type: "float"
+        description: "Accumulated operational cost"
+      - name: "sla_violations"
+        type: "integer"
+        description: "Number of SLA breaches"
+      - name: "time_step"
+        type: "integer"
+        description: "Current simulation timestep"
+      - name: "active_workers"
+        type: "integer"
+        description: "Number of active compute workers"
+      - name: "max_workers"
+        type: "integer"
+        description: "Maximum number of workers"
+
+  # Action space definition
+  action_space:
+    type: "discrete"
+    actions:
+      - name: "schedule_job"
+        description: "Schedule a pending job onto available workers"
+        parameters:
+          - name: "job_id"
+            type: "string"
+            required: false
+      - name: "allocate_resource"
+        description: "Allocate additional resources to a running job"
+        parameters:
+          - name: "job_id"
+            type: "string"
+            required: true
+          - name: "resource_amount"
+            type: "dict"
+            required: true
+      - name: "retry_failed"
+        description: "Retry a failed job"
+        parameters:
+          - name: "job_id"
+            type: "string"
+            required: true
+      - name: "cancel_job"
+        description: "Cancel a job to free resources"
+        parameters:
+          - name: "job_id"
+            type: "string"
+            required: true
+      - name: "scale_up"
+        description: "Scale up infrastructure by adding workers"
+        parameters: []
+      - name: "scale_down"
+        description: "Scale down infrastructure by removing idle workers"
+        parameters: []
+      - name: "wait"
+        description: "Wait for current jobs to complete"
+        parameters: []
+
+# Task definitions
+tasks:
+  - id: "easy"
+    name: "Basic Job Scheduling"
+    description: "Schedule incoming data processing jobs with abundant resources. Jobs arrive at a steady rate and must be scheduled onto available workers. No failures occur in this task."
+    max_steps: 100
+    success_threshold: 0.7
+    config:
+      job_arrival_rate: 0.3
+      failure_rate: 0.0
+      resource_scarcity: 0.0
+      enable_scaling: false
+      pipeline_types: ["etl"]
+      sla_deadline_multiplier: 3.0
+
+  - id: "medium"
+    name: "Resource-Constrained Scheduling"
+    description: "Manage data pipelines with limited resources. Jobs may fail randomly and require retries. Multiple pipeline types with different resource requirements compete for resources."
+    max_steps: 150
+    success_threshold: 0.6
+    config:
+      job_arrival_rate: 0.4
+      failure_rate: 0.05
+      resource_scarcity: 0.3
+      enable_scaling: false
+      pipeline_types: ["etl", "validation", "reporting"]
+      sla_deadline_multiplier: 2.0
+
+  - id: "hard"
+    name: "Multi-Pipeline Optimization"
+    description: "Optimize a complex data platform with multiple pipeline types including ML training jobs. Manage costs while meeting SLAs. Dynamic scaling is required to handle peak loads."
+    max_steps: 200
+    success_threshold: 0.5
+    config:
+      job_arrival_rate: 0.5
+      failure_rate: 0.08
+      resource_scarcity: 0.5
+      enable_scaling: true
+      cost_per_worker: 2.0
+      budget: 100.0
+      pipeline_types: ["etl", "ml_training", "validation", "reporting", "backup"]
+      sla_deadline_multiplier: 1.5
+
+# Evaluation configuration
+evaluation:
+  metrics:
+    - name: "completion_rate"
+      description: "Percentage of jobs successfully completed"
+      weight: 0.4
+      range: [0.0, 1.0]
+    
+    - name: "resource_efficiency"
+      description: "How well resources are utilized"
+      weight: 0.2
+      range: [0.0, 1.0]
+    
+    - name: "sla_compliance"
+      description: "Percentage of jobs completed within SLA deadlines"
+      weight: 0.25
+      range: [0.0, 1.0]
+    
+    - name: "cost_efficiency"
+      description: "How well costs are managed relative to budget"
+      weight: 0.15
+      range: [0.0, 1.0]
+  
+  # Scoring thresholds
+  scoring:
+    excellent: 0.8
+    good: 0.6
+    fair: 0.4
+    poor: 0.2
+
+# Reproducibility settings
+reproducibility:
+  seed_support: true
+  deterministic: true
+  recommended_seeds: [42, 123, 456, 789, 1000]
+
+# Dependencies
+dependencies:
+  python: ">=3.9"
+  packages:
+    - name: "typing-extensions"
+      version: ">=4.0.0"
